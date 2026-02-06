@@ -1,16 +1,23 @@
 import { z } from "zod"
-
- export const userFormSchema = z.object({
-     name: z
-         .string()
-         .min(2, "Name must be at least 2 characters")
-         .max(50, "Name must be at most 50 characters"),
-     email: z.string().email("Invalid email address"),
-     abhaId: z.string().min(5, "Abha ID is required"),
-     phone: z
-         .string()
-         .refine((phone) => /^\+\d{10,15}$/.test(phone), "Invalid phone number"),
-})
+export const userFormSchema = z.object({
+    name: z
+        .string()
+        .min(2, "Name must be at least 2 characters")
+        .max(50, "Name must be at most 50 characters"),
+    email: z.string().email("Invalid email address"),
+    abhaId: z.string().min(5, "Abha ID is required"),
+    password: z
+        .string()
+        .min(8, "Password must be at least 8 characters")
+        .max(50, "Password must be at most 50 characters"),
+    otp: z
+        .string()
+        .optional()
+        .refine(
+            (val) => !val || (val.length === 6 && /^\d+$/.test(val)),
+            "OTP must be 6 digits"
+        ),
+});
 
 export type UserFormInput = z.infer<typeof userFormSchema>
 
@@ -18,7 +25,7 @@ export enum FormFieldType {
     INPUT = "input",
     TEXTAREA = "textarea",
     PHONE_INPUT = "phone_input",
-    CHECKBOX ="Checkbox",
+    CHECKBOX = "Checkbox",
     DATE_PICKER = "datePicker",
     SELECT = "select",
     SKELETON = "skeleton",
@@ -71,6 +78,7 @@ export const Doctors = [
 
 
 export const IdentificationTypes = [
+    "Aadhaar Card",
     "Birth Certificate",
     "Driver's License",
     "Medical Insurance Card/Policy",
@@ -102,6 +110,7 @@ export const PatientFormValidation = z.object({
         .min(2, "Name must be at least 2 characters")
         .max(50, "Name must be at most 50 characters"),
     email: z.string().email("Invalid email address"),
+    abhaId: z.string().min(5, "ABHA ID is required"),
     phone: z
         .string()
         .refine((phone) => /^\+\d{10,15}$/.test(phone), "Invalid phone number"),
@@ -141,8 +150,17 @@ export const PatientFormValidation = z.object({
     identificationType: z.string().optional(),
     identificationNumber: z.string().optional(),
     identificationDocument: z.custom<File[]>().optional(),
-    
-   
+    treatmentConsent: z.boolean().refine(val => val === true, {
+        message: "You must consent to treatment",
+    }),
+    disclosureConsent: z.boolean().refine(val => val === true, {
+        message: "You must consent to disclosure",
+    }),
+    privacyConsent: z.boolean().refine(val => val === true, {
+        message: "You must consent to privacy policy",
+    }),
+
+
 });
 
 export type patientFormInput = z.infer<typeof PatientFormValidation>
@@ -150,26 +168,26 @@ export type patientFormInput = z.infer<typeof PatientFormValidation>
 
 
 export const PatientFormDefaultValues = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  birthDate: new Date(Date.now()),
-  gender: "Male" as Gender,
-  address: "",
-  occupation: "",
-  emergencyContactName: "",
-  emergencyContactNumber: "",
-  primaryPhysician: "",
-  insuranceProvider: "",
-  insurancePolicyNumber: "",
-  allergies: "",
-  currentMedication: "",
-  familyMedicalHistory: "",
-  pastMedicalHistory: "",
-  identificationType: "Birth Certificate",
-  identificationNumber: "",
-  identificationDocument: [],
+    name: "",
+    abhaId: "",
+    email: "",
+    phone: "",
+    birthDate: new Date(Date.now()),
+    gender: "Male" as Gender,
+    address: "",
+    occupation: "",
+    emergencyContactName: "",
+    emergencyContactNumber: "",
+    primaryPhysician: "",
+    insuranceProvider: "",
+    insurancePolicyNumber: "",
+    allergies: "",
+    currentMedication: "",
+    familyMedicalHistory: "",
+    pastMedicalHistory: "",
+    identificationType: "Aadhaar Card",
+    identificationNumber: "",
+    identificationDocument: [],
 };
 
 

@@ -1,7 +1,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import PatientForm from "../components/PatientForm"
+import dynamic from "next/dynamic"
+import PatientForm from "../components/PatientForm.client"
 
 
 
@@ -17,13 +18,16 @@ const Homepage = () => {
             <Image
               src="/assets/icons/logo-lotus.svg"
               alt="patient"
-              width={1000}
-              height={1000}
-            className="mb-12 h-17 w-fit"
+            width={160}
+            height={40}
+            priority
+            loading="eager"
+            className="mb-2 h-15 w-fit"
             />
 
 
           {/* Patient Form */}
+          <div id="clerk-captcha" className="hidden" />
           <PatientForm />
 
           {/* Fotter */}

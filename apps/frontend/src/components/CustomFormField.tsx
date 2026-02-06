@@ -29,6 +29,7 @@ interface CustomProps {
     iconAlt?: string;
     disabled?: boolean;
     dateFormat?: string;
+    type?:string;
     showTimeSelect?: boolean;
     children?: React.ReactNode; // sometime we want to show something inside the input  thats why we use children
     renderSkeleton?: (field: any) => React.ReactNode;  // this is typically use when we haev to show a loading state for an input  
@@ -45,7 +46,7 @@ const RenderField = ({
     props: CustomProps
 }) => {
 
-    const { fieldType, iconSrc, iconAlt, placeholder, showTimeSelect, dateFormat,renderSkeleton } = props
+    const { fieldType, iconSrc, iconAlt, placeholder, showTimeSelect, dateFormat,renderSkeleton,type } = props
 
     switch (fieldType) {
         case FormFieldType.INPUT:
@@ -66,6 +67,7 @@ const RenderField = ({
                         <Input
                             {...field}
                             value={field.value ?? ""}
+                            type={type}
                             placeholder={placeholder}
                             className=" bg-dark-400 placeholder:text-dark-600 border-dark-500 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 border-0"
                         />

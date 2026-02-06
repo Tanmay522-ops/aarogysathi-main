@@ -1,0 +1,81 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// User Model (From Clerk Authentication)
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique // Clerk authentication ID
+  name      String
+  email     String   @unique
+  abhaId    String   @unique // Ayushman Bharat Health Account ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  patient Patient?
+  
+  @@map("users")
+}
+
+
+// Patient Model (Extended user information from PatientFormValidation)
+
+model Patient {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  
+  // Personal Information
+  phone                   String
+  birthDate               DateTime
+  gender                  Gender
+  address                 String
+  occupation              String
+  
+  // Emergency Contact
+  emergencyContactName    String
+  emergencyContactNumber  String
+  
+  // Medical Information
+  primaryPhysician        String    // Doctor name from the Doctors array
+  allergies               String?
+  currentMedication       String?
+  familyMedicalHistory    String?
+  pastMedicalHistory      String?
+  
+  // Insurance Information
+  insuranceProvider       String
+  insurancePolicyNumber   String
+  
+  // Identification
+  identificationType      String?
+  identificationNumber    String?
+  identificationDocumentUrl String?  // Store the uploaded document URL
+  
+  // Consent
+  treatmentConsent        Boolean   @default(false)
+  disclosureConsent       Boolean   @default(false)
+  privacyConsent          Boolean   @default(false)
+  
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("patients")
+  @@index([primaryPhysician])
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}

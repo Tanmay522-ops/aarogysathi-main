@@ -1,8 +1,29 @@
+"use client"
 import RegisterForm from '@/components/RegisterForm'
+import { useUser } from '@clerk/nextjs';
 import Image from 'next/image'
+import { useEffect } from 'react';
 
 
 const Registerpage = () => {
+    const { user, isLoaded } = useUser();
+
+
+    useEffect(() => {
+        if (isLoaded && user) {
+            user.reload(); // ✅ force fetch latest metadata
+        }
+    }, [isLoaded, user]);
+
+    if (!isLoaded) {
+        return (
+            <div className="flex h-screen items-center justify-center bg-black text-white">
+                Loading your profile...
+            </div>
+        );
+    }
+
+
     return (
         <div className="flex h-screen max-h-screen">
             {/* Left  */}
@@ -18,7 +39,14 @@ const Registerpage = () => {
                     />
 
                     {/* Register Form */}
-                    <RegisterForm />
+                    <RegisterForm user={{
+                        name: user?.fullName || "",
+                        email: user?.primaryEmailAddress?.emailAddress || "",
+                        userId: user?.id!,
+                        abhaId: (user?.unsafeMetadata?.abhaId as string) || ""
+
+
+                    }} />
 
                     <p className="text-14-regular justify-items-end text-center text-dark-600 xl:text-left py-12">© 2026 aarogyaSathi</p>
 

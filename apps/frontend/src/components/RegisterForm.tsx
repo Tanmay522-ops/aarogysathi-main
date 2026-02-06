@@ -20,36 +20,101 @@ import { Form, FormControl } from "../../components/ui/form";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Label } from "../../components/ui/label";
 import { SelectItem } from "../../components/ui/select";
+import { useRouter } from "next/navigation";
 
+interface RegisterFormProps {
+    user: {
+        name: string;
+        email: string;
+        userId: string;
+        abhaId: string;
+    }
+}
 
+export function RegisterForm({ user }: RegisterFormProps) {
+    if (!user) {
+        return <p>Loading...</p>;
+    }
 
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
-
-export function RegisterForm() {
-
-    const [isLoading, setIsLoading] = useState(false)
 
     const form = useForm<z.infer<typeof PatientFormValidation>>({
         resolver: zodResolver(PatientFormValidation),
-        defaultValues:{
-            ...PatientFormDefaultValues,
-            name:"",
-            email:"",
-            phone:"",
+            defaultValues: {
+                name: user?.name ?? "",
+                email: user?.email ?? "",
+                abhaId: user?.abhaId ?? "",
+                birthDate: new Date(),
+                gender: "Male",
+                address: "",
+                occupation: "",
+                emergencyContactName: "",
+                emergencyContactNumber: "",
+                primaryPhysician: "",
+                insuranceProvider: "",
+                insurancePolicyNumber: "",
+                allergies: "",
+                currentMedication: "",
+                familyMedicalHistory: "",
+                pastMedicalHistory: "",
+                identificationType: "Aadhaar Card",
+                identificationNumber: "",
+                identificationDocument: undefined,
+                treatmentConsent: false,
+                disclosureConsent: false,
+                privacyConsent: false,
         }
     });
 
 
 
-    async function onSubmit({ name, email, phone }: z.infer<typeof PatientFormValidation>) {
+    async function onSubmit(values: z.infer<typeof PatientFormValidation>) {
         setIsLoading(true)
+        setError("");
         try {
-            const userData = { name, email, phone }
-            // we have to take this userData and pass it somewhere to create this user in the database
+            const formData = new FormData();
 
-        } catch (error) {
-            console.log(error)
+            // Add all form fields
+            Object.keys(values).forEach((key) => {
+                const value = values[key as keyof typeof values];
 
+                if (key === "identificationDocument" && value instanceof FileList) {
+                    formData.append(key, value[0]!);
+                } else if (key === "birthDate" && value instanceof Date) {
+                    formData.append(key, value.toISOString());
+                } else if (typeof value === "boolean") {
+                    formData.append(key, String(value));
+                } else if (value) {
+                    formData.append(key, String(value));
+                }
+            });
+
+            formData.append("userId", user.userId);
+            formData.append("abhaId", values.abhaId);
+            
+
+            const response = await fetch("/api/patients/register", {
+                method: "POST",
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Registration failed");
+            }
+
+            // Redirect to success page or dashboard
+            router.push(`/patients/${user.userId}/new-appointment`);
+          
+        } catch (error:any) {
+            console.error("Registration error:", error);
+            setError(error.message || "Failed to register. Please try again.");
+        } finally {
+            setIsLoading(false);
         }
     }
     return (
@@ -79,6 +144,21 @@ export function RegisterForm() {
                         iconAlt="user"
 
                     />
+                    <CustomFormField
+                        // Here we are defining fieldType here
+                        // filed type will be used to render different types of inputs or fileds
+
+                        // {/* NAME */}
+
+                        fieldType={FormFieldType.INPUT}
+                        control={form.control}
+                        name="abhaId"
+                        label="ABHA ID"
+                        placeholder="ABHA ID"
+                        iconSrc="/assets/icons/abha.svg"
+                        iconAlt="abha"
+
+                    />
 
                     {/* EMAIL & PHONE */}
 
@@ -95,7 +175,7 @@ export function RegisterForm() {
                         <CustomFormField
                             fieldType={FormFieldType.PHONE_INPUT}
                             control={form.control}
-                            name="Phone"
+                            name="phone"
                             label="Phone Number"
                             placeholder="(555)-123-4567 "
                         />
@@ -199,7 +279,7 @@ export function RegisterForm() {
 
                     // now we pass the additional children in the custom form field
                     >
-                        {Doctors.map((doctor) => (
+                        {Doctors?.map((doctor) => (
                             <SelectItem
                                 key={doctor.name}
                                 value={doctor.name}
@@ -253,7 +333,7 @@ export function RegisterForm() {
                         <CustomFormField
                             fieldType={FormFieldType.TEXTAREA}
                             control={form.control}
-                            name="currentMedications"
+                            name="currentMedication"
                             label="current medication (if any)"
                             placeholder="Ibuprofen 200mg, paracetamol 500mg"
                         />
@@ -349,6 +429,11 @@ export function RegisterForm() {
                             privacy policy"
                     />
                 </section>
+                {error && (
+                    <p className="text-sm text-red-500 font-medium">
+                        {error}
+                    </p>
+                )}
                 <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
             </form>
         </Form>
