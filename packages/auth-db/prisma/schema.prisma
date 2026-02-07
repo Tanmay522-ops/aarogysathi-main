@@ -30,7 +30,6 @@ model User {
 model Patient {
   id                      String  @id @default(cuid())
   userId                  String  @unique
-  
   phone                   String
   birthDate               DateTime
   gender                  Gender

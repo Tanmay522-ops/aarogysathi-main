@@ -27,6 +27,9 @@ importers:
         specifier: ^5.5.0
         version: 5.7.4
     devDependencies:
+      '@repo/appointment-db':
+        specifier: workspace:*
+        version: link:../../packages/appointment-db
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
@@ -295,6 +298,31 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
+
+  packages/appointment-db:
+    dependencies:
+      '@prisma/adapter-pg':
+        specifier: ^7.3.0
+        version: 7.3.0
+      '@prisma/client':
+        specifier: ^7.3.0
+        version: 7.3.0(prisma@7.3.0(@types/react@19.2.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)
+      pg:
+        specifier: ^8.18.0
+        version: 8.18.0
+    devDependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^25.2.1
+        version: 25.2.1
+      '@types/pg':
+        specifier: ^8.16.0
+        version: 8.16.0
+      prisma:
+        specifier: ^7.3.0
+        version: 7.3.0(@types/react@19.2.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
 
   packages/auth-db:
     dependencies:
