@@ -21,13 +21,12 @@ import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Label } from "../../components/ui/label";
 import { SelectItem } from "../../components/ui/select";
 import { useRouter } from "next/navigation";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 interface RegisterFormProps {
     user: {
         name: string;
         email: string;
-        userId: string;
-        abhaId: string;
     }
 }
 
@@ -39,14 +38,15 @@ export function RegisterForm({ user }: RegisterFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-
+    const { getToken } = useAuth();
+    const { user: clerkUser } = useUser();
 
     const form = useForm<z.infer<typeof PatientFormValidation>>({
         resolver: zodResolver(PatientFormValidation),
             defaultValues: {
-                name: user?.name ?? "",
-                email: user?.email ?? "",
-                abhaId: user?.abhaId ?? "",
+                name: user?.name ?? clerkUser?.fullName ?? "",
+                email: user?.email ?? clerkUser?.primaryEmailAddress?.emailAddress ?? "",
+                abhaId: (clerkUser?.unsafeMetadata?.abhaId as string) ?? "",
                 birthDate: new Date(),
                 gender: "Male",
                 address: "",
@@ -77,7 +77,6 @@ export function RegisterForm({ user }: RegisterFormProps) {
         try {
             const formData = new FormData();
 
-            // Add all form fields
             Object.keys(values).forEach((key) => {
                 const value = values[key as keyof typeof values];
 
@@ -87,20 +86,21 @@ export function RegisterForm({ user }: RegisterFormProps) {
                     formData.append(key, value.toISOString());
                 } else if (typeof value === "boolean") {
                     formData.append(key, String(value));
-                } else if (value) {
+                } else if (value !== null && value !== undefined && value !== "") {
                     formData.append(key, String(value));
                 }
             });
 
-            formData.append("userId", user.userId);
-            formData.append("abhaId", values.abhaId);
-            
+            const token = await getToken();
 
-            const response = await fetch("/api/patients/register", {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
                 method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 body: formData,
             });
-
+            
             const data = await response.json();
 
             if (!response.ok) {
@@ -108,7 +108,7 @@ export function RegisterForm({ user }: RegisterFormProps) {
             }
 
             // Redirect to success page or dashboard
-            router.push(`/patients/${user.userId}/new-appointment`);
+            router.push(`/patients/${data.patientId}/new-appointment`);
           
         } catch (error:any) {
             console.error("Registration error:", error);
@@ -116,6 +116,13 @@ export function RegisterForm({ user }: RegisterFormProps) {
         } finally {
             setIsLoading(false);
         }
+    }
+    if (!clerkUser) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <p>Loading...</p>
+            </div>
+        );
     }
     return (
         <Form {...form}>
@@ -434,7 +441,7 @@ export function RegisterForm({ user }: RegisterFormProps) {
                         {error}
                     </p>
                 )}
-                <SubmitButton isLoading={isLoading}>Get Started</SubmitButton>
+                <SubmitButton  isLoading={isLoading}>Get Started</SubmitButton>
             </form>
         </Form>
     )

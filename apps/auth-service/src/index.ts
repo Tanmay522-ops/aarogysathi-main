@@ -1,8 +1,9 @@
-import express, {Request,Response} from 'express';
+import express, {NextFunction, Request,Response} from 'express';
 import cors from 'cors';
 import { clerkMiddleware, getAuth } from '@clerk/express'
 import { shouldBeUser } from './middleware/authMiddleware.js';
 import registerRouter from "./routes/register.route"
+import webhookRoutes from "./routes/webhooks.routes";
 
 const app = express();
 app.use(
@@ -12,6 +13,7 @@ app.use(
 }));
 
 app.use(clerkMiddleware())
+
 
 
 app.get('/health', (req:Request, res:Response) => {  
@@ -29,7 +31,18 @@ app.get("/test",shouldBeUser, (req:Request, res:Response) => {
     });
 })
 
+app.use("/webhooks", express.raw({ type: "application/json" }), webhookRoutes);
+app.use(express.json());
+
 app.use("/register",registerRouter)
+
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+    console.log(err);
+    return res
+        .status(err.status || 500)
+        .json({ message: err.message || "Inter Server Error!" });
+});
 
 
 app.listen(8000,()=>{

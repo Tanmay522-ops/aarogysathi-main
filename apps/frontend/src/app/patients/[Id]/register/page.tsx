@@ -39,14 +39,12 @@ const Registerpage = () => {
                     />
 
                     {/* Register Form */}
-                    <RegisterForm user={{
-                        name: user?.fullName || "",
-                        email: user?.primaryEmailAddress?.emailAddress || "",
-                        userId: user?.id!,
-                        abhaId: (user?.unsafeMetadata?.abhaId as string) || ""
-
-
-                    }} />
+                    <RegisterForm 
+                        user={{
+                            name: user?.fullName || "",
+                            email: user?.primaryEmailAddress?.emailAddress || "",
+                        }}
+                    />
 
                     <p className="text-14-regular justify-items-end text-center text-dark-600 xl:text-left py-12">© 2026 aarogyaSathi</p>
 
