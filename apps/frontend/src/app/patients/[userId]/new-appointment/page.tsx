@@ -32,10 +32,10 @@ async function getCurrentPatient() {
 const NewAppointment = async ({
   params,
 }: {
-  params: { userId:string};
+  params: Promise<{ userId: string }>;
 }) => {
-
-  const { userId } = params;
+  
+  const { userId } = await params; 
 
   const patient = await getCurrentPatient();
 
