@@ -9,7 +9,7 @@ import CustomFormField from "./CustomFormField";
 import SubmitButton from "./SubmitButton";
 import { useState, useEffect } from "react";
 import { Form } from "../../components/ui/form";
-import { useSignUp, useAuth } from "@clerk/nextjs"; // ✅ Add useAuth
+import { useSignUp, useAuth, useUser } from "@clerk/nextjs"; 
 import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 
@@ -18,6 +18,11 @@ const PatientForm = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const { isSignedIn, signOut } = useAuth(); // ✅ Add this
   const router = useRouter()
+
+  const {user} = useUser()
+  console.log(user)
+
+
 
   const [pendingVerification, setPendingVerification] = useState(false);
   const [error, setError] = useState("");
@@ -29,16 +34,29 @@ const PatientForm = () => {
       name: "",
       email: "",
       password: "",
-      abhaId: "",
       otp: "",
     },
   })
 
   useEffect(() => {
+
+    const role = user?.publicMetadata?.role;
+    if (role === "patient") {
+      router.push(`/patients/${user?.id}/register`)
+    } else if (role === "doctor") {
+      router.push(`/doctors/${user?.id}/register`)
+    }else if (role === "admin") {
+      window.location.href = `${process.env.NEXT_PUBLIC_DASHBOARD_URL}/${role}`
+      
+    }
+
+
+
+
     if (isSignedIn) {
       setError("You're already signed in. Please sign out to create a new account.");
     }
-  }, [isSignedIn]);
+  }, [isSignedIn,user, router]);
 
   if (!isLoaded) {
     return null;
@@ -104,9 +122,7 @@ const PatientForm = () => {
         firstName: name.split(" ")[0],
         lastName: name.split(" ").slice(1).join(" "),
         password: password,
-        unsafeMetadata: {
-          abhaId: form.getValues("abhaId"),
-        },
+
       })
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
@@ -215,7 +231,7 @@ const PatientForm = () => {
       {!pendingVerification ? (
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex-1 space-y-6"
+          className="space-y-6"
         >
           <section className="mb-8 space-y-4">
             <h1 className="text-[32px] leading-[36px] font-bold">
@@ -255,16 +271,7 @@ const PatientForm = () => {
             placeholder="Enter your password"
             iconSrc="/assets/icons/abha.svg"
             iconAlt="password"
-          />
 
-          <CustomFormField
-            fieldType={FormFieldType.INPUT}
-            control={form.control}
-            name="abhaId"
-            label="ABHA ID"
-            placeholder="ABCX12345678"
-            iconSrc="/assets/icons/abha.svg"
-            iconAlt="abha"
           />
 
           {error && (
@@ -307,8 +314,8 @@ const PatientForm = () => {
 
           {error && (
             <div className={`p-3 text-sm rounded-md border ${error.includes("✅")
-                ? "text-green-600 bg-green-50 border-green-200"
-                : "text-red-500 bg-red-50 border-red-200"
+              ? "text-green-600 bg-green-50 border-green-200"
+              : "text-red-500 bg-red-50 border-red-200"
               }`}>
               {error}
             </div>

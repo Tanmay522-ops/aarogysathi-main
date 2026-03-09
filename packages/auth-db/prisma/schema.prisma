@@ -8,13 +8,18 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
 
 model User {
   id        String  @id @default(cuid())
   clerkId   String  @unique
   name      String
   email     String  @unique
-  abhaId    String?  @unique
+  role      Role     @default(PATIENT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -27,16 +32,18 @@ model User {
 
 
 
+
 model Patient {
   id                      String  @id @default(cuid())
   userId                  String  @unique
-  phone                   String
+  abhaId                  String  @unique @db.VarChar(14)
+  phone                   String  @db.VarChar(15)
   birthDate               DateTime
   gender                  Gender
   address                 String
   occupation              String
   emergencyContactName    String
-  emergencyContactNumber  String
+  emergencyContactNumber  String  @db.VarChar(15)
   primaryPhysician        String
   allergies               String?
   currentMedication       String?

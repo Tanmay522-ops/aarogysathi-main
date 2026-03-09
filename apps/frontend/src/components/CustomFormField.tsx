@@ -69,6 +69,14 @@ const RenderField = ({
                             value={field.value ?? ""}
                             type={type}
                             placeholder={placeholder}
+                            onChange={(e) => {
+                                if (type === "number") {
+                                    const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                    field.onChange(value);
+                                } else {
+                                    field.onChange(e.target.value);
+                                }
+                            }}
                             className=" bg-dark-400 placeholder:text-dark-600 border-dark-500 h-11 focus-visible:ring-0 focus-visible:ring-offset-0 border-0"
                         />
                     </FormControl>

@@ -12,14 +12,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@repo/appointment-db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^20",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "@repo/appointment-db": "workspace:*"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@clerk/fastify": "^2.6.21",
-    "fastify": "^5.5.0"
+    "@fastify/cors": "^11.2.0",
+    "@fastify/multipart": "^9.4.0",
+    "cloudinary": "^2.9.0",
+    "fastify": "^5.5.0",
+    "svix": "^1.84.1"
   }
 }

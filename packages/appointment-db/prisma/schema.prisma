@@ -15,36 +15,51 @@ datasource db {
 
 
 model Doctor {
-  id                String        @id @default(cuid())
-  name              String        @unique
-  image             String?
-  specialization    String?
-  qualification     String?
-  experience        Int?
-  consultationFee   Float?
-  availability      String?       // JSON string for availability schedule
-  isActive          Boolean       @default(true)
+  id                      String      @id @default(cuid())
+  clerkId                 String      @unique
+  name                    String
+  email                   String      @unique
+  phone                   String      @db.VarChar(15)
+  image                   String?
+  specialization          String
+  qualification           String
+  licenseNumber           String      @unique
+  experience              Int
+  consultationFee         Decimal     @db.Decimal(10, 2)
+  address                 String
+  availability            DateTime
+  about                   String?     @db.Text
+  emergencyContactName    String
+  emergencyContactNumber  String      @db.VarChar(15)
+  licenseDocumentUrl      String?
   
-  appointments      Appointment[] 
+  isActive                Boolean     @default(true)
+  isVerified              Boolean     @default(true)
   
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  appointments            Appointment[]
+  
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
 
   @@map("doctors")
+  @@index([specialization])
+  @@index([isActive, isVerified])
 }
 
 
 model Appointment {
-  id                  String            @id @default(uuid())
-  userId              String
-  patientId           String
+  id                  String            @id @default(cuid())
+  userId              String           
+  patientId           String            
+
   doctorId            String
-  doctor              Doctor            @relation(fields: [doctorId], references: [id])
+  doctor              Doctor            @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  
   schedule            DateTime
-  reason              String?
-  note                String?
+  reason              String?           @db.Text
+  note                String?           @db.Text
   status              AppointmentStatus @default(PENDING)
-  cancellationReason  String?
+  cancellationReason  String?           @db.Text
   
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
@@ -54,13 +69,16 @@ model Appointment {
   @@index([doctorId])
   @@index([status])
   @@index([schedule])
+  @@index([createdAt])
   @@map("appointments")
 }
 
 enum AppointmentStatus {
   PENDING
   SCHEDULED
+  CONFIRMED
   CANCELLED
   COMPLETED
+  NO_SHOW
 }
 

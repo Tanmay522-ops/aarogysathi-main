@@ -22,7 +22,7 @@ const Homepage = () => {
             height={40}
             priority
             loading="eager"
-            className="mb-2 h-15 w-fit"
+            className="mb-12 h-15 w-fit"
             />
 
 

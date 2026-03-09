@@ -1,27 +1,44 @@
 import Fastify from "fastify";
 import { clerkPlugin } from '@clerk/fastify'
-import {  shouldBeUser } from "./middleware/authMiddleware.js";
+import {  shouldBeUser } from "./middleware/authMiddleware";
+import appointmentRoutes from "./routes/appointement.route";
+import cors from "@fastify/cors";  
+import doctorRoutes from "./routes/doctor.route";
+import multipart from "@fastify/multipart";
 
-const fastify = Fastify()
 
+const fastify = Fastify({logger: true})
 
-fastify.register(clerkPlugin)
+fastify.register(cors, {
+    origin: ["http://localhost:3002", "http://localhost:3003"],
+    credentials: true,
 
-fastify.get("/health",(request,reply)=>{
-     return reply.status(200).send({
+});
+
+fastify.register(multipart, {
+    limits: {
+        fileSize: 10 * 1024 * 1024,
+    },
+});
+fastify.register(clerkPlugin);
+
+fastify.get("/health", (request, reply) => {
+    return reply.status(200).send({
         status: "ok",
         uptime: process.uptime(),
-        timeStamp: Date.now(),  
-      })
+        timeStamp: Date.now(),
+    })
 })
 
-fastify.get("/test",{preHandler: shouldBeUser}, (request, reply) => {
+fastify.get("/test", { preHandler: shouldBeUser }, (request, reply) => {
     return reply.status(200).send({
         message: "Appointment service is authenticated successfully!",
         userId: request.userId,
     })
 })
 
+fastify.register(appointmentRoutes, { prefix: "/appointments" })
+fastify.register(doctorRoutes, { prefix: "/doctors" }) 
 
 const start = async () => {
     try {

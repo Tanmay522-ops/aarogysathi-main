@@ -71,13 +71,11 @@ router.post("/", shouldBeUser, upload.single("identificationDocument"), async (r
             update: {
                 name: clerkUser.fullName || `${clerkUser.firstName} ${clerkUser.lastName}` || "User",
                 email: userEmail,
-                abhaId: abhaId || null,
             },
             create: {
                 clerkId,
                 name: clerkUser.fullName || `${clerkUser.firstName} ${clerkUser.lastName}` || "User",
                 email: userEmail,
-                abhaId: abhaId || null,
             },
         });
 
@@ -110,6 +108,7 @@ router.post("/", shouldBeUser, upload.single("identificationDocument"), async (r
         const patient = await prisma.patient.create({
             data: {
                 userId: user.id,
+                abhaId,
                 phone,
                 birthDate: new Date(birthDate),
                 gender,

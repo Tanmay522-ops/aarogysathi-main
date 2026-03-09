@@ -14,6 +14,7 @@
   "dependencies": {
     "@clerk/express": "^1.7.69",
     "@repo/auth-db": "workspace:*",
+    "@repo/appointment-db": "workspace:*",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "express": "^5.0.3",
